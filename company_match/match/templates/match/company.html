@@ -1,36 +1,69 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company</title>
-</head>
-<body>
-    <h1>{{ company.name }}</h1>
-    <p>Industry: {{ company.industry }}</p>
-    <p>Location: {{ company.location }}</p>
-    <p>Work-life balance rating: {{ company.work_life_balance_rating }}</p>
-    <p>Compensation rating: {{ company.compensation_rating }}</p>
-    <p>Career advancement rating: {{ company.career_advancement_rating }}</p>
-    <p>Management relationship rating: {{ company.management_relationship_rating }}</p>
-    <p>Work environment rating: {{ company.work_environment_rating }}</p>
-    <p>Overall rating: {{ company.overall_rating }}</p>
-
-    <!-- 企業の画像を表示 -->
-    <h2>Images:</h2>
-    <div>
+    <head>
+        <meta charset="utf-8">
+        <title>企業マッチング</title>
+        <link rel="stylesheet" type="text/css" href="{% static "match/css/style.css" %}">
+    </head>
+    
+<div class="card-container">
+    <!-- 画像がある場合、1つ目の画像を表示 -->
+    {% if images %}
         {% for image in images %}
-            <img src="{{ image.image.url }}" alt="Image for {{ company.name }}" width="200">
+            <div class="card-image" style="background-image: url('{{ image.image.url }}');"></div>
         {% endfor %}
+    {% else %}
+        <p>No images available for this company.</p>
+    {% endif %}
+    
+    <div class="card-info">
+        <h1>{{ company.name }}</h1>
+        <p><strong>{{ company.industry }}</strong></p>
+        <p>{{ company.location }}</p>
+        <p>Work-life balance: {{ company.work_life_balance_rating }}</p>
+        <p>Compensation: {{ company.compensation_rating }}</p>
+        <p>Career advancement: {{ company.career_advancement_rating }}</p>
+        <p>Management relationship: {{ company.management_relationship_rating }}</p>
+        <p>Work environment: {{ company.work_environment_rating }}</p>
+        <p>Overall rating: {{ company.overall_rating }}</p>
     </div>
 
-    <!-- Good/Bad ボタン -->
-    <form method="post" action="{% url 'evaluate_company' %}">
-        {% csrf_token %}
-        <input type="hidden" name="company_id" value="{{ company.id }}">
-        <input type="hidden" name="index" value="{{ index }}">
-        <button type="submit" name="choice" value="good">Good</button>
-        <button type="submit" name="choice" value="bad">Bad</button>
-    </form>
-</body>
-</html>
+    <div class="buttons-container">
+        <button class="swipe-button" onclick="handleSwipe('bad')">
+            <img src="{% static 'match/bad-icon.png' %}" alt="Bad">
+        </button>
+        <button class="swipe-button" onclick="handleSwipe('good')">
+            <img src="{% static 'match/good-icon.png' %}" alt="Good">
+        </button>
+    </div>
+</div>
+
+<script>
+    function handleSwipe(choice) {
+        let form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "evaluate_company" %}';
+        
+        let csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = '{{ csrf_token }}';
+        form.appendChild(csrfToken);
+    
+        let companyId = document.createElement('input');
+        companyId.type = 'hidden';
+        companyId.name = 'company_id';
+        companyId.value = '{{ company.id }}';
+        form.appendChild(companyId);
+    
+        let choiceInput = document.createElement('input');
+        choiceInput.type = 'hidden';
+        choiceInput.name = 'choice';
+        choiceInput.value = choice;
+        form.appendChild(choiceInput);
+    
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>

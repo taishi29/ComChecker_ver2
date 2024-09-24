@@ -2,29 +2,72 @@
 <html>
 <head>
     <title>Result</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        canvas {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Best Match</h1>
-    {% if best_match %}
-        <p>Company Name: {{ best_match.name }}</p>
-        <p>Industry: {{ best_match.industry }}</p>
-        <p>Location: {{ best_match.location }}</p>
-        <p>Work-life balance rating: {{ best_match.work_life_balance_rating }}</p>
-        <p>Compensation rating: {{ best_match.compensation_rating }}</p>
-        <p>Career advancement rating: {{ best_match.career_advancement_rating }}</p>
-        <p>Management relationship rating: {{ best_match.management_relationship_rating }}</p>
-        <p>Work environment rating: {{ best_match.work_environment_rating }}</p>
-        
-        <!-- 企業の画像を表示 -->
-        <h2>Images</h2>
-        <div>
-            {% for image in images %}
-                <img src="{{ image.image.url }}" alt="Company Image" style="max-width: 300px;">
-            {% endfor %}
-        </div>
+    <div class="container">
+        <h1>Best Match</h1>
+        {% if best_match %}
+            <h2>{{ best_match.name }}</h2>
+            <p><strong>Industry:</strong> {{ best_match.industry }}</p>
+            <p><strong>Location:</strong> {{ best_match.location }}</p>
 
-    {% else %}
-        <p>No matching company found.</p>
-    {% endif %}
+            <h2>Evaluation Parameters</h2>
+            <canvas id="radarChart"></canvas>
+
+            <h2>Images</h2>
+            <div>
+                {% for image in images %}
+                    <img src="{{ image.image.url }}" alt="Company Image" style="max-width: 300px;">
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <p>No matching company found.</p>
+        {% endif %}
+    </div>
+
+    <!-- レーダーチャートの描画 -->
+    <script>
+        var ctx = document.getElementById('radarChart').getContext('2d');
+        var radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Work-life balance', 'Compensation', 'Career advancement', 'Management relationship', 'Work environment'],
+                datasets: [{
+                    label: '{{ best_match.name }}',
+                    data: [
+                        {{ best_match.work_life_balance_rating }},
+                        {{ best_match.compensation_rating }},
+                        {{ best_match.career_advancement_rating }},
+                        {{ best_match.management_relationship_rating }},
+                        {{ best_match.work_environment_rating }}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scale: {
+                    ticks: {
+                        beginAtZero: true,
+                        max: 5  // 最大評価を5に設定
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

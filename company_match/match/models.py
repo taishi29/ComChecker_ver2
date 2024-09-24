@@ -7,7 +7,7 @@ class Company(models.Model):
     name = models.CharField(max_length=255)  # 企業名
     industry = models.CharField(max_length=100)  # 業種
     location = models.CharField(max_length=255)  # 所在地
-    # パラメータ
+    # パラメータg
     work_life_balance_rating = models.DecimalField(
         max_digits=2, decimal_places=1, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)]
     )  # ワークライフバランス
