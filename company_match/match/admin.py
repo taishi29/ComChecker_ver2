@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Company, CompanyImage
 
-# Register your models here.
+# Companyモデルを管理サイトに登録
+admin.site.register(Company)
+admin.site.register(CompanyImage)
