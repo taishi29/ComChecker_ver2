@@ -11,29 +11,25 @@
 <body>
     <div class="container">
         <div class="card">
-            <!-- 企業の画像を上部に配置 -->
-            <div class="card-image" style="background-image: url('{{ images.0.image.url }}');"></div>
+            <!-- 画像をクリックすると次の画像に切り替える -->
+            <div class="card-image" id="company-image" style="background-image: url('{{ images.0.image.url }}');"></div>
 
             <div class="overlay">
                 <div class="card-content">
-                    <!-- 企業情報の表示 -->
                     <h1>{{ company.name }} <span class="info">{{ company.overall_rating }}</span></h1>
                     <p class="info">業界: {{ company.industry }}</p>
                     <p class="info">所在地: {{ company.location }}</p>
                 </div>
 
-                <!-- グラフエリア -->
                 <h2>カテゴリー別評価</h2>
                 <div class="radar-chart-container">
-                    <canvas id="ratingsChart"></canvas> <!-- レーダーチャート用のキャンバス -->
+                    <canvas id="ratingsChart"></canvas>
                 </div>
 
-                <!-- Good/Badボタン -->
                 <div class="buttons">
                     <form method="POST" action="{% url 'evaluate_company' %}">
                         {% csrf_token %}
                         <input type="hidden" name="company_id" value="{{ company.id }}">
-                        <!-- indexをフォームに追加して、サーバーに送信 -->
                         <input type="hidden" name="index" value="{{ index }}">
                         <button type="submit" name="choice" value="bad" class="dislike">Bad</button>
                         <button type="submit" name="choice" value="good" class="like">Good</button>
@@ -45,7 +41,21 @@
 
     <!-- JavaScript -->
     <script>
-        // レーダーチャートを生成するJavaScript
+        const images = [
+            {% for image in images %}
+                "{{ image.image.url }}",
+            {% endfor %}
+        ];
+
+        let currentImageIndex = 0;
+        const companyImageElement = document.getElementById('company-image');
+
+        companyImageElement.addEventListener('click', function() {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            companyImageElement.style.backgroundImage = `url(${images[currentImageIndex]})`;
+        });
+
+        // レーダーチャートの生成
         const ctx = document.getElementById('ratingsChart').getContext('2d');
         const ratingsChart = new Chart(ctx, {
             type: 'radar',

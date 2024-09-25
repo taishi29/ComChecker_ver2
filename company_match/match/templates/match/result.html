@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Result</title>
+    <title>あなたに合う宮崎の企業は...</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .container {
@@ -17,13 +17,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>Best Match</h1>
+        <h1>あなたに合う宮崎の企業は…</h1>
         {% if best_match %}
             <h2>{{ best_match.name }}</h2>
-            <p><strong>Industry:</strong> {{ best_match.industry }}</p>
-            <p><strong>Location:</strong> {{ best_match.location }}</p>
+            <p><strong>業種: </strong> {{ best_match.industry }}</p>
+            <p><strong>場所: </strong> {{ best_match.location }}</p>
 
-            <h2>Evaluation Parameters</h2>
+            <h2>企業パラメーター</h2>
             <canvas id="radarChart"></canvas>
 
             <h2>Images</h2>

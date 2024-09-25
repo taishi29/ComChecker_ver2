@@ -80,21 +80,27 @@ body, html {
     height: 60px;
     border-radius: 50%;
     border: none;
-    background-color: white;
-    background-size: 50%;
-    background-repeat: no-repeat;
+    background-color: transparent; /* 背景色を透明に */
+    background-size: cover; /* 背景画像をボタンにフィットさせる */
     background-position: center;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
 }
 
+
 .buttons button.dislike {
     background-color: #ff6060;
-    background-image: url("{% static 'match/css/bad-icon.png' %}");
+    background-image: url("{% static 'match/bad-icon.png' %}");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .buttons button.like {
     background-color: #60ff60;
-    background-image: url("{% static 'match/css/good-icon.png' %}");
+    background-image: url("{% static 'match/good-icon.png' %}");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
