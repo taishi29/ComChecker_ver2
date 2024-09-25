@@ -1,69 +1,81 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <title>企業マッチング</title>
-        <link rel="stylesheet" type="text/css" href="{% static "match/css/style.css" %}">
-    </head>
-    
-<div class="card-container">
-    <!-- 画像がある場合、1つ目の画像を表示 -->
-    {% if images %}
-        {% for image in images %}
-            <div class="card-image" style="background-image: url('{{ image.image.url }}');"></div>
-        {% endfor %}
-    {% else %}
-        <p>No images available for this company.</p>
-    {% endif %}
-    
-    <div class="card-info">
-        <h1>{{ company.name }}</h1>
-        <p><strong>{{ company.industry }}</strong></p>
-        <p>{{ company.location }}</p>
-        <p>Work-life balance: {{ company.work_life_balance_rating }}</p>
-        <p>Compensation: {{ company.compensation_rating }}</p>
-        <p>Career advancement: {{ company.career_advancement_rating }}</p>
-        <p>Management relationship: {{ company.management_relationship_rating }}</p>
-        <p>Work environment: {{ company.work_environment_rating }}</p>
-        <p>Overall rating: {{ company.overall_rating }}</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.jsライブラリの読み込み -->
+    <link rel="stylesheet" type="text/css" href="{% static 'match/css/style.css' %}"> <!-- 外部CSSの読み込み -->
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- 企業の画像を上部に配置 -->
+            <div class="card-image" style="background-image: url('{{ images.0.image.url }}');"></div>
+
+            <div class="overlay">
+                <div class="card-content">
+                    <!-- 企業情報の表示 -->
+                    <h1>{{ company.name }} <span class="info">{{ company.overall_rating }}</span></h1>
+                    <p class="info">業界: {{ company.industry }}</p>
+                    <p class="info">所在地: {{ company.location }}</p>
+                </div>
+
+                <!-- グラフエリア -->
+                <h2>カテゴリー別評価</h2>
+                <div class="radar-chart-container">
+                    <canvas id="ratingsChart"></canvas> <!-- レーダーチャート用のキャンバス -->
+                </div>
+
+                <!-- Good/Badボタン -->
+                <div class="buttons">
+                    <form method="POST" action="{% url 'evaluate_company' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="company_id" value="{{ company.id }}">
+                        <button type="submit" name="choice" value="bad" class="dislike">Bad</button>
+                        <button type="submit" name="choice" value="good" class="like">Good</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="buttons-container">
-        <button class="swipe-button" onclick="handleSwipe('bad')">
-            <img src="{% static 'match/bad-icon.png' %}" alt="Bad">
-        </button>
-        <button class="swipe-button" onclick="handleSwipe('good')">
-            <img src="{% static 'match/good-icon.png' %}" alt="Good">
-        </button>
-    </div>
-</div>
-
-<script>
-    function handleSwipe(choice) {
-        let form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{% url "evaluate_company" %}';
-        
-        let csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = 'csrfmiddlewaretoken';
-        csrfToken.value = '{{ csrf_token }}';
-        form.appendChild(csrfToken);
-    
-        let companyId = document.createElement('input');
-        companyId.type = 'hidden';
-        companyId.name = 'company_id';
-        companyId.value = '{{ company.id }}';
-        form.appendChild(companyId);
-    
-        let choiceInput = document.createElement('input');
-        choiceInput.type = 'hidden';
-        choiceInput.name = 'choice';
-        choiceInput.value = choice;
-        form.appendChild(choiceInput);
-    
-        document.body.appendChild(form);
-        form.submit();
-    }
-</script>
+    <!-- JavaScript -->
+    <script>
+        // レーダーチャートを生成するJavaScript
+        const ctx = document.getElementById('ratingsChart').getContext('2d');
+        const ratingsChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['ワークライフバランス', '給与', 'キャリアアップ', '上司との関係', '職場環境'],
+                datasets: [{
+                    label: '企業評価',
+                    data: [{{ company.work_life_balance_rating }}, {{ company.compensation_rating }}, {{ company.career_advancement_rating }}, {{ company.management_relationship_rating }}, {{ company.work_environment_rating }}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scale: {
+                    ticks: {
+                        beginAtZero: true,
+                        max: 5,
+                        stepSize: 1
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
