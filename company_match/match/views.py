@@ -85,3 +85,11 @@ def show_result(request):
         'best_match': best_match,
         'images': best_match_images
     })
+
+
+# セッションをリセットして1からマッチングを再スタートするビュー
+def reset_matching(request):
+    # セッションをリセット
+    request.session.flush()
+    # 最初の企業から再スタート
+    return redirect('show_company', index=1)

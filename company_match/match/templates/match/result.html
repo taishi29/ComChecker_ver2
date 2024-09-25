@@ -1,41 +1,51 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>あなたに合う宮崎の企業は...</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            text-align: center;
-        }
-        canvas {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.jsライブラリの読み込み -->
+    <link rel="stylesheet" type="text/css" href="{% static 'match/css/style.css' %}"> <!-- 外部CSSの読み込み -->
 </head>
 <body>
     <div class="container">
-        <h1>あなたに合う宮崎の企業は…</h1>
-        {% if best_match %}
-            <h2>{{ best_match.name }}</h2>
-            <p><strong>業種: </strong> {{ best_match.industry }}</p>
-            <p><strong>場所: </strong> {{ best_match.location }}</p>
+        <div class="card">
+            <!-- 企業の画像を上部に配置 -->
+            {% if images %}
+                <div class="card-image" id="best-match-image" style="background-image: url('{{ images.0.image.url }}');"></div>
+            {% else %}
+                <div class="card-image" id="best-match-image" style="background-image: url('{% static 'match/default-image.jpg' %}');"></div> <!-- デフォルト画像 -->
+            {% endif %}
 
-            <h2>企業パラメーター</h2>
-            <canvas id="radarChart"></canvas>
+            <div class="overlay">
+                <div class="card-content">
+                    <!-- 企業情報の表示 -->
+                    <h1>あなたに合う宮崎の企業は...</h1>
+                    {% if best_match %}
+                        <h2>{{ best_match.name }}</h2>
+                        <p class="info"><strong>業種: </strong>{{ best_match.industry }}</p>
+                        <p class="info"><strong>場所: </strong>{{ best_match.location }}</p>
+                    {% else %}
+                        <p>一致する企業が見つかりませんでした。</p>
+                    {% endif %}
+                </div>
 
-            <h2>Images</h2>
-            <div>
-                {% for image in images %}
-                    <img src="{{ image.image.url }}" alt="Company Image" style="max-width: 300px;">
-                {% endfor %}
+                <!-- グラフエリア -->
+                <h2>企業パラメーター</h2>
+                <div class="radar-chart-container">
+                    <canvas id="radarChart"></canvas> <!-- レーダーチャート用のキャンバス -->
+                </div>
+
+                <!-- もう一度マッチング！ボタン -->
+                <div class="retry-button">
+                    <form method="POST" action="{% url 'reset_matching' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="retry">もう一度マッチング！</button>
+                    </form>
+                </div>
             </div>
-
-        {% else %}
-            <p>No matching company found.</p>
-        {% endif %}
+        </div>
     </div>
 
     <!-- レーダーチャートの描画 -->
@@ -44,7 +54,7 @@
         var radarChart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Work-life balance', 'Compensation', 'Career advancement', 'Management relationship', 'Work environment'],
+                labels: ['ワークライフバランス', '給与', 'キャリアアップ', '上司との関係', '職場環境'],
                 datasets: [{
                     label: '{{ best_match.name }}',
                     data: [
@@ -60,13 +70,36 @@
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scale: {
                     ticks: {
                         beginAtZero: true,
                         max: 5  // 最大評価を5に設定
                     }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
                 }
             }
+        });
+
+        // 画像のクリックで次の画像に切り替え
+        const images = [
+            {% for image in images %}
+                "{{ image.image.url }}",
+            {% endfor %}
+        ];
+        
+        let currentImageIndex = 0;
+        const bestMatchImageElement = document.getElementById('best-match-image');
+
+        bestMatchImageElement.addEventListener('click', function() {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            bestMatchImageElement.style.backgroundImage = `url(${images[currentImageIndex]})`;
         });
     </script>
 </body>
