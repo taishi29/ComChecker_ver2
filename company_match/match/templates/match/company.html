@@ -33,6 +33,8 @@
                     <form method="POST" action="{% url 'evaluate_company' %}">
                         {% csrf_token %}
                         <input type="hidden" name="company_id" value="{{ company.id }}">
+                        <!-- indexをフォームに追加して、サーバーに送信 -->
+                        <input type="hidden" name="index" value="{{ index }}">
                         <button type="submit" name="choice" value="bad" class="dislike">Bad</button>
                         <button type="submit" name="choice" value="good" class="like">Good</button>
                     </form>
